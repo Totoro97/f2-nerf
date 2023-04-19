@@ -1,0 +1,27 @@
+defaults:
+  - train: 20k
+  - dataset: default
+  - renderer: default
+  - pts_sampler: perspective
+  - field: hash3d_anchored
+  - shader: sh_shader
+  - _self_
+
+dataset_name: nerf_llff_data
+case_name: horns
+exp_name: test
+
+is_continue: false
+
+mode: train
+
+pts_sampler:
+  sub_div_milestones: [ 1000, 2000, 4000, 6000, 8000, 10000 ]
+  sample_l: 1.953125e-3   # 1. / 512.
+
+dataset:
+  factor: 4
+  bounds_factor: [ 0.25, 4.0 ]
+
+train:
+  disp_loss_weight: 5e-2

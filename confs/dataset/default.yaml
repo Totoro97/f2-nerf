@@ -1,0 +1,4 @@
+factor: 1.0
+ray_sample_mode: all_images
+data_at_gpu: true
+bounds_factor: [ 0.5, 2.0 ]

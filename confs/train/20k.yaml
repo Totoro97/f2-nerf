@@ -1,0 +1,17 @@
+pts_batch_size: 262144
+end_iter: 20000
+report_freq: 50
+vis_freq: 2500
+stats_freq: 5000
+save_freq: 20000
+validate_freq: 100000
+tv_loss_weight: 1e-1
+ray_march_init_fineness: 4
+ray_march_fineness_decay_end_iter: 10000
+disp_loss_weight: 0.
+learning_rate: 1e-2
+learning_rate_alpha: 1e-1
+learning_rate_warm_up_end_iter: 1000
+var_loss_weight: 1e-2
+var_loss_start: 5000
+var_loss_end: 10000

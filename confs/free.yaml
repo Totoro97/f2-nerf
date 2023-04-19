@@ -1,0 +1,21 @@
+defaults:
+  - train: 20k
+  - dataset: default
+  - renderer: default
+  - pts_sampler: perspective
+  - field: hash3d_anchored
+  - shader: sh_shader
+  - _self_
+
+dataset_name: free_dataset
+case_name: hydrant
+exp_name: test
+
+is_continue: false
+
+mode: train
+
+dataset:
+  factor: 2
+  bounds_factor: [ 0.5, 4.0 ]
+

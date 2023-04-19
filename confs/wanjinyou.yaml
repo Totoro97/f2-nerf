@@ -1,0 +1,31 @@
+defaults:
+  - train: 20k
+  - dataset: default
+  - renderer: default
+  - pts_sampler: perspective
+  - field: hash3d_anchored
+  - shader: sh_shader
+  - _self_
+
+dataset_name: example
+case_name: tmp
+exp_name: test
+
+is_continue: false
+
+mode: train
+
+renderer:
+  # Appearance embedding to handling unstable lighting conditions
+  use_app_emb: true
+
+pts_sampler:
+  near: 0.01
+  scale_by_dis: true
+
+dataset:
+  factor: 2
+  bounds_factor: [ 0.5, 4.0 ]
+
+train:
+  ray_march_init_fineness: 16

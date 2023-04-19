@@ -1,0 +1,6 @@
+[submodule "External/tiny-cuda-nn"]
+	path = External/tiny-cuda-nn
+	url = https://github.com/NVlabs/tiny-cuda-nn
+[submodule "External/yaml-cpp"]
+	path = External/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp

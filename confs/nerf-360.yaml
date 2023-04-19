@@ -1,0 +1,22 @@
+defaults:
+  - train: 20k
+  - dataset: default
+  - renderer: default
+  - pts_sampler: perspective
+  - field: hash3d_anchored
+  - shader: sh_shader
+  - _self_
+
+dataset_name: 360_v2
+case_name: bonsai
+exp_name: test
+
+is_continue: false
+
+mode: train
+
+dataset:
+  # set factor = 2 for [ bonsai, counter, kitchen, room ]
+  # set factor = 4 for [ bicycle, garden, stump ]
+  factor: 2
+  bounds_factor: [ 0.5, 4.0 ]

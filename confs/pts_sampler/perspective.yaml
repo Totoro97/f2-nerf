@@ -1,0 +1,12 @@
+type: PersSampler
+bbox_min: [ -1.0, -1.0, -1.0 ]
+bbox_max: [  1.0,  1.0,  1.0 ]
+sub_div_milestones: [ 2000, 4000, 6000, 8000, 10000 ]
+compact_freq: 1000
+max_oct_intersect_per_ray: 1024
+bbox_levels: 10
+max_level: 16
+split_dist_thres: 1.5
+sample_l: 3.90625e-3   # 1. / 256.
+scale_by_dis: false
+near: 0.05

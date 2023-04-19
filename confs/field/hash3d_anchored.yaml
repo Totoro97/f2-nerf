@@ -1,0 +1,6 @@
+type: Hash3DAnchored
+log2_table_size: 19
+rand_bias: true
+mlp_hidden_dim: 64
+mlp_out_dim: 16
+n_hidden_layers: 1

@@ -1,0 +1,6 @@
+type: SHShader
+d_in: 32
+d_out: 3
+d_hidden: 64
+n_hiddens: 2
+degree: 4
