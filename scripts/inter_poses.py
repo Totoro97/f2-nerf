@@ -49,7 +49,6 @@ def hello(data_dir, n_out_poses, key_poses):
     n_poses = len(poses)
     key_poses = np.array([int(_) for _ in key_poses.split(',')])
     key_poses = poses[key_poses]
-    key_poses = poses
 
     out_poses = inter_poses(key_poses, n_out_poses)
     out_poses = np.ascontiguousarray(out_poses.astype(np.float64))
