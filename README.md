@@ -33,12 +33,12 @@ cd f2-nerf
 We take `torch-1.13.1+cu117` for example.
 ```shell
 cd External
-https://download.pytorch.org/libtorch/cu117/libtorch-cxx11-abi-shared-with-deps-1.13.1%2Bcu117.zip
+wget https://download.pytorch.org/libtorch/cu117/libtorch-cxx11-abi-shared-with-deps-1.13.1%2Bcu117.zip
 unzip ./libtorch-cxx11-abi-shared-with-deps-1.13.1%2Bcu117.zip
 ```
 
 ### Step 4. Compile
-The lowest G++ version I have tested is 7.5.0.
+The lowest g++ version I have tested is 7.5.0.
 ```shell
 cd ..
 cmake . -B build
