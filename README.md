@@ -84,7 +84,7 @@ Make sure the images are at `./data/<your-dataset-name>/<your-case-name>/images`
 
 2. Generate cameras file:
 ```shell
-python scripts/colmap2poses.py --data_dir <your-data-dir>
+python scripts/colmap2poses.py --data_dir ./data/<your-dataset-name>/<your-case-name>
 ```
 
 3. Run F2-NeRF using the similar command as in the example data:
