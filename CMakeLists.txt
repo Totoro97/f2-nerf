@@ -1,5 +1,10 @@
-cmake_minimum_required(VERSION 3.10)
-project(f2nerf)
+cmake_minimum_required(VERSION 3.18)
+project(f2nerf
+        VERSION 0.1
+        LANGUAGES CUDA CXX)
+
+include(CheckLanguage)
+check_language(CUDA)
 
 set(CMAKE_CXX_STANDARD 14)
 
@@ -41,8 +46,6 @@ add_subdirectory(External/yaml-cpp)
 include_directories(External/yaml-cpp/include)
 
 # eigen
-# find_package(Eigen3 REQUIRED)
-# include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(External/eigen-3.4.0)
 
 include(src/Field/field.cmake)
@@ -55,13 +58,11 @@ include(src/Utils/utils.cmake)
 list(APPEND SRC_ALL
         ${SRC_FIELD}
         ${SRC_DATASET}
-        ${SRC_FRUS_PLANNER}
         ${SRC_GEOMETRY}
         ${SRC_PTS_SAMPLER}
         ${SRC_RENDERER}
         ${SRC_SHADER}
-        ${SRC_UTILS}
-        ${SRC_WARPPER})
+        ${SRC_UTILS})
 
 list(APPEND SRC_ALL src/ExpRunner.cpp)
 
