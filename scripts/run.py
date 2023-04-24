@@ -39,7 +39,13 @@ def make_image_list(data_path, factor):
 
 @hydra.main(version_base=None, config_path='../confs', config_name='default')
 def main(conf: DictConfig) -> None:
-    base_dir = os.getcwd()
+    if 'work_dir' in conf:
+        base_dir = conf['work_dir']
+    else:
+        base_dir = os.getcwd()
+
+    print('Working directory is {}'.format(base_dir))
+
     data_path = os.path.join(base_dir, 'data', conf['dataset_name'], conf['case_name'])
     base_exp_dir = os.path.join(base_dir, 'exp', conf['case_name'], conf['exp_name'])
 
@@ -67,8 +73,8 @@ def main(conf: DictConfig) -> None:
     OmegaConf.save(conf, './runtime_config.yaml')
 
     for build_dir in ['build', 'cmake-build-release']:
-        if os.path.exists('./{}/main'.format(build_dir)):
-            os.system('./{}/main'.format(build_dir))
+        if os.path.exists('{}/{}/main'.format(base_dir, build_dir)):
+            os.system('{}/{}/main'.format(base_dir, build_dir))
             return
 
     assert False, 'Can not find executable file'
