@@ -50,13 +50,13 @@ cmake --build build --target main --config RelWithDebInfo -j
 ### Training
 Here is an example command to train F2-NeRF:
 ```shell
-python scripts/run.py --config-name=wanjinyou dataset_name=example case_name=ngp_fox mode=train
+python scripts/run.py --config-name=wanjinyou dataset_name=example case_name=ngp_fox mode=train +work_dir=$(pwd)
 ```
 
 ### Render test images
 Simply run:
 ```shell
-python scripts/run.py --config-name=wanjinyou dataset_name=example case_name=ngp_fox mode=test is_continue=true
+python scripts/run.py --config-name=wanjinyou dataset_name=example case_name=ngp_fox mode=test is_continue=true +work_dir=$(pwd)
 ```
 
 ### Render path
@@ -69,7 +69,7 @@ python scripts/inter_poses.py --data_dir ./data/example/ngp_fox --key_poses 5,10
 The file `poses_render.npy` in the data directory would be generated. Then run
 
 ```shell
-python scripts/run.py --config-name=wanjinyou dataset_name=example case_name=ngp_fox mode=render_path is_continue=true
+python scripts/run.py --config-name=wanjinyou dataset_name=example case_name=ngp_fox mode=render_path is_continue=true +work_dir=$(pwd)
 ```
 
 The synthesized images can be found in `./exp/ngp_fox/test/novel_images`.
@@ -90,7 +90,8 @@ python scripts/colmap2poses.py --data_dir ./data/<your-dataset-name>/<your-case-
 3. Run F2-NeRF using the similar command as in the example data:
 ```shell
 python scripts/run.py --config-name=wanjinyou \
-dataset_name=<your-dataset-name> case_name=<your-case-name> mode=train
+dataset_name=<your-dataset-name> case_name=<your-case-name> mode=train \
++work_dir=$(pwd)
 ```
 
 ## Train F2-NeRF on LLFF/NeRF-360-V2 dataset
