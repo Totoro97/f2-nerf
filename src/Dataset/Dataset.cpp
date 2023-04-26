@@ -121,7 +121,7 @@ Dataset::Dataset(GlobalDataPool* global_data_pool) {
   // Prepare training images
   height_ = images[0].size(0);
   width_  = images[0].size(1);
-  image_tensors_ = torch::stack(images, 0).to(torch::kCUDA).contiguous();
+  image_tensors_ = torch::stack(images, 0).contiguous();
 }
 
 void Dataset::NormalizeScene() {
@@ -283,17 +283,17 @@ std::tuple<BoundedRays, Tensor, Tensor> Dataset::RandRaysData(int batch_size, in
   if ((sets & DATA_TEST_SET) != 0) {
     img_idx.insert(img_idx.end(), test_set_.begin(), test_set_.end());
   }
-  Tensor cur_set = torch::from_blob(img_idx.data(), { int(img_idx.size())}, CPUInt).to(torch::kCUDA);
-  Tensor cam_indices = torch::randint(int(img_idx.size()), { batch_size }, CUDALong); // Torch index need "long long" type
+  Tensor cur_set = torch::from_blob(img_idx.data(), { int(img_idx.size())}, CPUInt);
+  Tensor cam_indices = torch::randint(int(img_idx.size()), { batch_size }, CPULong); // Torch index need "long long" type
   cam_indices = cur_set.index({cam_indices}).contiguous();
-  Tensor i = torch::randint(0, height_, batch_size, CUDALong);
-  Tensor j = torch::randint(0, width_, batch_size, CUDALong);
-  Tensor ij = torch::stack({i, j}, -1).contiguous();
+  Tensor i = torch::randint(0, height_, batch_size, CPULong);
+  Tensor j = torch::randint(0, width_, batch_size, CPULong);
+  Tensor ij = torch::stack({i, j}, -1).to(torch::kCUDA).contiguous();
 
-  Tensor gt_colors = image_tensors_.view({-1, 3}).index({ (cam_indices * height_ * width_ + i * width_ + j).to(torch::kLong) }).contiguous();
+  Tensor gt_colors = image_tensors_.view({-1, 3}).index({ (cam_indices * height_ * width_ + i * width_ + j).to(torch::kLong) }).to(torch::kCUDA).contiguous();
+  cam_indices = cam_indices.to(torch::kCUDA);
   auto [ rays_o, rays_d ] = Img2WorldRayFlex(cam_indices.to(torch::kInt32), ij.to(torch::kInt32));
   Tensor bounds = bounds_.index({cam_indices.to(torch::kLong)}).contiguous();
-
   return { { rays_o, rays_d, bounds }, gt_colors, cam_indices.to(torch::kInt32).contiguous() };
 }
 
