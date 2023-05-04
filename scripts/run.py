@@ -17,19 +17,17 @@ backup_file_patterns = [
 
 def make_image_list(data_path, factor):
     image_list = []
-    if not (0.999 < factor < 1.001):
+    suffix = ['*.jpg', '*.png', '*.JPG', '*.jpeg']
+    if 0.999 < factor < 1.001:
+        for suf in suffix:
+            image_list += glob(os.path.join(data_path, 'images', suf)) +\
+                          glob(os.path.join(data_path, 'images_1', suf))
+    else:
         f_int = int(np.round(factor))
-        image_list = glob(os.path.join(data_path, 'images_{}'.format(f_int), '*.jpg')) + \
-                     glob(os.path.join(data_path, 'images_{}'.format(f_int), '*.png')) + \
-                     glob(os.path.join(data_path, 'images_{}'.format(f_int), '*.JPG')) + \
-                     glob(os.path.join(data_path, 'images_{}'.format(f_int), '*.jpeg'))
+        for suf in suffix:
+            image_list += glob(os.path.join(data_path, 'images_{}'.format(f_int), suf))
 
-    if len(image_list) == 0:
-        image_list = glob(os.path.join(data_path, 'images', '*.jpg')) + \
-                     glob(os.path.join(data_path, 'images', '*.png')) + \
-                     glob(os.path.join(data_path, 'images', '*.JPG')) + \
-                     glob(os.path.join(data_path, 'images', '*.jpeg'))
-
+    assert len(image_list) > 0, "No image found"
     image_list.sort()
 
     f = open(os.path.join(data_path, 'image_list.txt'), 'w')
