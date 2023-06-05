@@ -34,7 +34,6 @@ Renderer::Renderer(GlobalDataPool* global_data_pool, int n_images) {
   shader_ = ConstructShader(global_data_pool);
   RegisterSubPipe(shader_.get());
 
-
   use_app_emb_ = conf["use_app_emb"].as<bool>();
   // WARNING: Hard code here.
   app_emb_ = torch::randn({ n_images, 16 }, CUDAFloat) * .1f;
@@ -87,13 +86,13 @@ RenderResult Renderer::Render(const Tensor& rays_o, const Tensor& rays_d, const 
       global_data_pool_->meaningful_sampled_pts_per_ray_ = global_data_pool_->meaningful_sampled_pts_per_ray_ * 0.9f;
     }
     return {
-      colors,
-      torch::zeros({ n_rays, 1 }, CUDAFloat),
-      torch::zeros({ n_rays }, CUDAFloat),
-      Tensor(),
-      torch::full({ n_rays }, 512.f, CUDAFloat),
-      Tensor(),
-      Tensor()
+        colors,
+        torch::zeros({ n_rays, 1 }, CUDAFloat),
+        torch::zeros({ n_rays }, CUDAFloat),
+        Tensor(),
+        torch::full({ n_rays }, 512.f, CUDAFloat),
+        Tensor(),
+        Tensor()
     };
   }
   CHECK_EQ(rays_o.sizes()[0], sample_result_.pts_idx_bounds.sizes()[0]);
@@ -175,11 +174,12 @@ RenderResult Renderer::Render(const Tensor& rays_o, const Tensor& rays_d, const 
   }
 
 
+  Tensor idx_start_end = sample_result_early_stop.pts_idx_bounds;
+
   Tensor sampled_density = DensityAct(scene_feat.index({ Slc(), Slc(0, 1) }));
 
-  Tensor shading_feat = torch::cat({
-    torch::ones_like(scene_feat.index({Slc(), Slc(0, 1)}), CUDAFloat),
-    scene_feat.index({Slc(), Slc(1, None)})}, 1);
+  Tensor shading_feat = torch::cat({torch::ones_like(scene_feat.index({Slc(), Slc(0, 1)}), CUDAFloat),
+                                    scene_feat.index({Slc(), Slc(1, None)})}, 1);
 
   if (global_data_pool_->mode_ == RunningMode::TRAIN && use_app_emb_) {
     Tensor all_emb_idx = CustomOps::ScatterIdx(n_all_pts, sample_result_early_stop.pts_idx_bounds, emb_idx);
@@ -187,12 +187,16 @@ RenderResult Renderer::Render(const Tensor& rays_o, const Tensor& rays_d, const 
   }
 
   Tensor sampled_colors = shader_->Query(shading_feat, dirs);
-
+  if (global_data_pool_->gradient_scaling_progress_ < 1.) {
+    sampled_density = CustomOps::GradientScaling(sampled_density, idx_start_end,
+                                                 global_data_pool_->gradient_scaling_progress_);
+    sampled_colors = CustomOps::GradientScaling(sampled_colors, idx_start_end,
+                                                global_data_pool_->gradient_scaling_progress_);
+  }
   Tensor sampled_dt = sample_result_early_stop.dt;
   Tensor sampled_t = (sample_result_early_stop.t + 1e-2f).contiguous();
   Tensor sec_density = sampled_density.index({Slc(), 0}) * sampled_dt;
   Tensor alphas = 1.f - torch::exp(-sec_density);
-  Tensor idx_start_end = sample_result_early_stop.pts_idx_bounds;
   Tensor acc_density = FlexOps::AccumulateSum(sec_density, idx_start_end, false);
   Tensor trans = torch::exp(-acc_density);
   Tensor weights = trans * alphas;

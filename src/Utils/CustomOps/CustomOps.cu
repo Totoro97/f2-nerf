@@ -65,18 +65,16 @@ __global__ void WeightVarLossBackwardKernel(int n_outs, float* weights, int* idx
   }
 }
 
-__global__ void GradientDoorBackwardKernel(int n_rays, int c, float ratio, float* rand_val, int* idx_start_end, float* out_vals) {
+__global__ void GradientScalingBackwardKernel(int n_rays, int c, float progress, float* rand_val, int* idx_start_end, float* out_vals) {
   int idx = LINEAR_IDX();
   if (idx >= n_rays) return;
   int idx_start = idx_start_end[idx * 2];
   int idx_end   = idx_start_end[idx * 2 + 1];
   for (int i = 0; i + idx_start < idx_end; i++) {
-    float cur_ratio = ratio + (1.f - ratio) * (float(i) + .5f) / float(idx_end - idx_start);
+    float a = (float(i) + .5f) / float(idx_end - idx_start);
+    float cur_scale = progress + (1.f - progress) * a * a;
     for (int j = 0; j < c; j++) {
-      // out_vals[(i + idx_start) * c + j] *= cur_ratio;
-      if (rand_val[(i + idx_start) * c + j] > cur_ratio) {
-        out_vals[(i + idx_start) * c + j] *= 0.f;
-      }
+      out_vals[(i + idx_start) * c + j] *= cur_scale;
     }
   }
 }
@@ -126,7 +124,7 @@ public:
   }
 };
 
-class GradientDoor : public Function<GradientDoor> {
+class GradientScaling : public Function<GradientScaling> {
 public:
   static variable_list forward(AutogradContext *ctx,
                                Tensor weights,
@@ -158,10 +156,10 @@ public:
     dim3 grid_dim  = LIN_GRID_DIM(n_rays);
     dim3 block_dim = LIN_BLOCK_DIM(n_rays);
 
-    GradientDoorBackwardKernel<<<grid_dim, block_dim>>>(n_rays, c, ratio,
-                                                        rand_val.data_ptr<float>(),
-                                                        idx_start_end.data_ptr<int>(),
-                                                        out_dl_dw.data_ptr<float>());
+    GradientScalingBackwardKernel<<<grid_dim, block_dim>>>(n_rays, c, ratio,
+                                                           rand_val.data_ptr<float>(),
+                                                           idx_start_end.data_ptr<int>(),
+                                                           out_dl_dw.data_ptr<float>());
 
     return { out_dl_dw, Tensor(), Tensor() };
   }
@@ -173,42 +171,7 @@ Tensor CustomOps::WeightVar(Tensor weights, Tensor idx_start_end) {
   return torch::autograd::WeightVarLoss::apply(weights.contiguous(), idx_start_end.contiguous())[0];
 }
 
-Tensor CustomOps::GradientDoor(torch::Tensor weights, torch::Tensor idx_start_end, float ratio) {
+Tensor CustomOps::GradientScaling(torch::Tensor weights, torch::Tensor idx_start_end, float ratio) {
   Tensor ratio_ts = torch::full({1}, ratio, CUDAFloat);
-  return torch::autograd::GradientDoor::apply(weights.contiguous(), idx_start_end.contiguous(), ratio_ts)[0];
-}
-
-__global__ void DropoutMaskKernel(int n_rays, float alpha, int* idx_start_end, float* rand_vals, float* mask) {
-  int ray_idx = LINEAR_IDX();
-  if (ray_idx >= n_rays) { return; }
-  int idx_start = idx_start_end[ray_idx * 2];
-  int idx_end   = idx_start_end[ray_idx * 2 + 1];
-  if (idx_start >= idx_end) { return; }
-  float len = idx_end - idx_start;
-  for (int i = 0; i + idx_start < idx_end; i++) {
-    float prob = (.5f + float(i)) / len * alpha + 1.f * (1.f - alpha);
-    if (prob + 1e-5f > rand_vals[i + idx_start]) {
-      mask[i + idx_start] = 1.f;
-    }
-    else {
-      mask[i + idx_start] = 0.f;
-    }
-  }
-}
-
-Tensor CustomOps::DropoutMask(int n_pts, torch::Tensor idx_start_end, float alpha) {
-  int n_rays = idx_start_end.size(0);
-  CK_CONT(idx_start_end);
-
-  Tensor rand_vals = torch::rand({ n_pts }, CUDAFloat);
-  Tensor mask = torch::rand({ n_pts }, CUDAFloat);
-
-  dim3 grid_dim  = LIN_GRID_DIM(n_rays);
-  dim3 block_dim = LIN_BLOCK_DIM(n_rays);
-
-  DropoutMaskKernel<<<grid_dim, block_dim>>>(n_rays, alpha,
-                                             idx_start_end.data_ptr<int>(),
-                                             rand_vals.data_ptr<float>(),
-                                             mask.data_ptr<float>());
-  return mask;
+  return torch::autograd::GradientScaling::apply(weights.contiguous(), idx_start_end.contiguous(), ratio_ts)[0];
 }

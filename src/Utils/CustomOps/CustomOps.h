@@ -22,8 +22,7 @@ public:
 namespace CustomOps {
 
 torch::Tensor WeightVar(torch::Tensor weights, torch::Tensor idx_start_end);
-torch::Tensor DropoutMask(int n_rays, torch::Tensor idx_start_end, float alpha);
-torch::Tensor GradientDoor(torch::Tensor weights, torch::Tensor idx_start_end, float ratio);
+torch::Tensor GradientScaling(torch::Tensor weights, torch::Tensor idx_start_end, float ratio);
 
 }
 

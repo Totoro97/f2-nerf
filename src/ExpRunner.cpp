@@ -41,6 +41,8 @@ ExpRunner::ExpRunner(const std::string& conf_path) {
   var_loss_weight_ = config["train"]["var_loss_weight"].as<float>();
   var_loss_start_ = config["train"]["var_loss_start"].as<int>();
   var_loss_end_ = config["train"]["var_loss_end"].as<int>();
+  gradient_scaling_start_ = config["train"]["gradient_scaling_start"].as<int>();
+  gradient_scaling_end_ = config["train"]["gradient_scaling_end"].as<int>();
 
   // Dataset
   dataset_ = std::make_unique<Dataset>(global_data_pool_.get());
@@ -239,7 +241,18 @@ void ExpRunner::UpdateAdaParams() {
   for (auto& g : optimizer_->param_groups()) {
     g.options().set_lr(lr);
   }
+
+  // Update gradient scaling ratio
+  {
+    float progress = 1.f;
+    if (iter_step_ < gradient_scaling_end_) {
+      progress = std::max(0.f,
+          (float(iter_step_) - gradient_scaling_start_) / (gradient_scaling_end_ - gradient_scaling_start_ + 1e-9f));
+    }
+    global_data_pool_->gradient_scaling_progress_ = progress;
+  }
 }
+
 
 std::tuple<Tensor, Tensor, Tensor> ExpRunner::RenderWholeImage(Tensor rays_o, Tensor rays_d, Tensor bounds) {
   torch::NoGradGuard no_grad_guard;

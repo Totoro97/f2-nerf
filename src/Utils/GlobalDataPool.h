@@ -27,6 +27,7 @@ public:
   float distortion_weight_ = 0.f;
   float ray_march_fineness_ = 1.f;
   float near_ = 0.1f;
+  float gradient_scaling_progress_ = 1.f;
   bool backward_nan_ = false;
 };
 

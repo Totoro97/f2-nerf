@@ -39,6 +39,7 @@ public:
   float ray_march_init_fineness_;
   int ray_march_fineness_decay_end_iter_;
   int var_loss_start_, var_loss_end_;
+  int gradient_scaling_start_, gradient_scaling_end_;
   float learning_rate_, learning_rate_alpha_, learning_rate_warm_up_end_iter_;
   float gradient_door_end_iter_;
   float var_loss_weight_, tv_loss_weight_, disp_loss_weight_;

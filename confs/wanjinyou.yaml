@@ -29,3 +29,5 @@ dataset:
 
 train:
   ray_march_init_fineness: 16
+  gradient_scaling_start: 1000
+  gradient_scaling_end: 5000

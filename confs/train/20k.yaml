@@ -15,3 +15,5 @@ learning_rate_warm_up_end_iter: 1000
 var_loss_weight: 1e-2
 var_loss_start: 5000
 var_loss_end: 10000
+gradient_scaling_start: 0
+gradient_scaling_end: 0
