@@ -47,8 +47,11 @@ def hello(data_dir, n_out_poses, key_poses):
     poses = np.load(pjoin(data_dir, 'cams_meta.npy')).reshape(-1, 27)[:, :12].reshape(-1, 3, 4)
 
     n_poses = len(poses)
-    key_poses = np.array([int(_) for _ in key_poses.split(',')])
-    key_poses = poses[key_poses]
+    if key_poses == 'all':
+        key_poses = poses.copy()
+    else:
+        key_poses = np.array([int(_) for _ in key_poses.split(',')])
+        key_poses = poses[key_poses]
 
     out_poses = inter_poses(key_poses, n_out_poses)
     out_poses = np.ascontiguousarray(out_poses.astype(np.float64))

@@ -75,12 +75,15 @@ python scripts/run.py --config-name=wanjinyou dataset_name=example case_name=ngp
 The synthesized images can be found in `./exp/ngp_fox/test/novel_images`.
 
 ## Train F2-NeRF on your custom data
-Make sure COLMAP has been installed.
+Make sure the images are at `./data/<your-dataset-name>/<your-case-name>/images`
 1. Run COLMAP SfM:
 ```shell
 bash scripts/local_colmap_and_resize.sh ./data/<your-dataset-name>/<your-case-name>
 ```
-Make sure the images are at `./data/<your-dataset-name>/<your-case-name>/images`
+or run [hloc](https://github.com/cvg/Hierarchical-Localization) if COLMAP failed. (Make sure [hloc](https://github.com/cvg/Hierarchical-Localization) has been installed)
+```shell
+bash scripts/local_hloc_and_resize.sh ./data/<your-dataset-name>/<your-case-name>
+```
 
 2. Generate cameras file:
 ```shell

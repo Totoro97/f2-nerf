@@ -1,3 +1,4 @@
+import os
 from os.path import join as pjoin
 from copy import deepcopy
 from glob import glob
@@ -5,7 +6,7 @@ import click
 import numpy as np
 import camera_utils
 import cv2 as cv
-from pycolmap.pycolmap.scene_manager import SceneManager
+from colmap_warpper.pycolmap.scene_manager import SceneManager
 from typing import Mapping, Optional, Sequence, Text, Tuple, Union
 
 
@@ -18,7 +19,15 @@ class NeRFSceneManager(SceneManager):
     """
 
     def __init__(self, data_dir):
-        super(NeRFSceneManager, self).__init__(pjoin(data_dir, 'sparse', '0'))
+        # COLMAP
+        if os.path.exists(pjoin(data_dir, 'sparse', '0')):
+            sfm_dir = pjoin(data_dir, 'sparse', '0')
+        # hloc
+        else:
+            sfm_dir = pjoin(data_dir, 'hloc_sfm')
+
+        assert os.path.exists(sfm_dir)
+        super(NeRFSceneManager, self).__init__(sfm_dir)
 
     def process(
             self
