@@ -1,3 +1,4 @@
+find_package(PythonInterp REQUIRED)
 cmake_minimum_required(VERSION 3.18)
 project(f2nerf
         VERSION 0.1

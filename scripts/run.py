@@ -1,5 +1,4 @@
 import os
-import click
 import numpy as np
 from shutil import copyfile
 from omegaconf import OmegaConf, DictConfig
