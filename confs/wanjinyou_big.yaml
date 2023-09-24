@@ -28,8 +28,8 @@ pts_sampler:
   scale_by_dis: true
 
 dataset:
-  factor: 2
-  bounds_factor: [ 0.5, 4.0 ]
+  factor: 1
+  bounds_factor: [ 0.5, 4.0]
 
 train:
   ray_march_init_fineness: 16

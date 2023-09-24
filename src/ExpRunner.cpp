@@ -17,7 +17,6 @@ ExpRunner::ExpRunner(const std::string &conf_path)
 {
   global_data_pool_ = std::make_unique<GlobalDataPool>(conf_path);
   const auto &config = global_data_pool_->config_;
-  case_name_ = config["case_name"].as<std::string>();
   base_dir_ = config["base_dir"].as<std::string>();
 
   base_exp_dir_ = config["base_exp_dir"].as<std::string>();

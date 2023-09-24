@@ -11,17 +11,19 @@
 #include "Renderer/Renderer.h"
 #include "Utils/GlobalDataPool.h"
 
-class ExpRunner {
+class ExpRunner
+{
   using Tensor = torch::Tensor;
+
 public:
-  ExpRunner(const std::string& conf_path);
+  ExpRunner(const std::string &conf_path);
 
   void Execute();
   void Train();
   void TestImages();
   void RenderAllImages();
 
-  void LoadCheckpoint(const std::string& path);
+  void LoadCheckpoint(const std::string &path);
   void SaveCheckpoint();
   void UpdateAdaParams();
   std::tuple<Tensor, Tensor, Tensor> RenderWholeImage(Tensor rays_o, Tensor rays_d, Tensor bounds);
@@ -29,7 +31,7 @@ public:
   void VisualizeImage(int idx);
 
   // data
-  std::string case_name_, base_dir_, base_exp_dir_;
+  std::string base_dir_, base_exp_dir_;
 
   unsigned iter_step_ = 0;
   unsigned end_iter_;

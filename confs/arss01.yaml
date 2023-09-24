@@ -7,8 +7,6 @@ defaults:
   - shader: sh_shader
   - _self_
 
-# dataset_name: example
-case_name: tmp
 data_path: null
 dataset_name: null
 exp_name: test
@@ -26,7 +24,7 @@ pts_sampler:
   scale_by_dis: true
 
 dataset:
-  factor: 2
+  factor: 1
   bounds_factor: [ 0.5, 4.0 ]
 
 train:
