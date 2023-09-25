@@ -1,4 +1,11 @@
 {
+    "[cpp]": {
+        "editor.wordBasedSuggestions": false,
+        "editor.suggest.insertMode": "replace",
+        "editor.semanticHighlighting.enabled": true,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
+    },
     "files.associations": {
         "*.dockerfile": "dockerfile",
         "chrono": "cpp",

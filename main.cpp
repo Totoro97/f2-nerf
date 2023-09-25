@@ -1,10 +1,9 @@
+#include "src/ExpRunner.h"
 #include <iostream>
 #include <memory>
 #include <torch/torch.h>
-#include "src/ExpRunner.h"
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   std::cout << "Aoligei!" << std::endl;
   torch::manual_seed(2022);
 
