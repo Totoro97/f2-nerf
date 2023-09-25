@@ -27,11 +27,8 @@ def make_image_list(data_path, factor):
     suffix = ['*.jpg', '*.png', '*.JPG', '*.jpeg']
     if 0.999 < factor < 1.001:
         for suf in suffix:
-            # image_list += glob(os.path.join(data_path, 'images', suf)) +\
-            #               glob(os.path.join(data_path, 'images_1', suf))
             image_list += glob(f"{data_path}/images/{suf}")
     else:
-        print("go into factor into outside of 0.999 < factor < 1.001")
         f_int = int(np.round(factor))
         for suf in suffix:
             image_list += glob(
@@ -53,8 +50,6 @@ def main(conf: DictConfig) -> None:
         base_dir = os.getcwd()
 
     print('Working directory is {}'.format(base_dir))
-
-    # data_path = os.path.join(base_dir, 'data', conf['dataset_name'], conf['case_name'])
     data_path = f"{conf['data_path']}/{conf['dataset_name']}"
     base_exp_dir = os.path.join(base_dir, 'exp', conf['dataset_name'],
                                 conf['exp_name'])
