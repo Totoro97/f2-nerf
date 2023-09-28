@@ -30,6 +30,9 @@ public:
   void RenderPath();
   void VisualizeImage(int idx);
 
+  void OutputMeshMeta();
+  std::tuple<Tensor, Tensor>
+  RenderWholeImageForMesh(Tensor rays_o, Tensor rays_d, Tensor bounds);
   // data
   std::string base_dir_, base_exp_dir_;
 

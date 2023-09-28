@@ -317,6 +317,52 @@ ExpRunner::RenderWholeImage(Tensor rays_o, Tensor rays_d, Tensor bounds) {
   return {pred_colors, first_oct_disp, pred_disp};
 }
 
+std::tuple<Tensor, Tensor> ExpRunner::RenderWholeImageForMesh(Tensor rays_o,
+                                                              Tensor rays_d,
+                                                              Tensor bounds) {
+  torch::NoGradGuard no_grad_guard;
+  rays_o = rays_o.to(torch::kCPU);
+  rays_d = rays_d.to(torch::kCPU);
+  bounds = bounds.to(torch::kCPU);
+  const int n_rays = rays_d.sizes()[0];
+
+  Tensor pred_colors = torch::zeros({n_rays, 3}, CPUFloat);
+  Tensor pred_depths = torch::zeros({n_rays, 1}, CPUFloat);
+
+  const int ray_batch_size = 8192;
+  for (int i = 0; i < n_rays; i += ray_batch_size) {
+    int i_high = std::min(i + ray_batch_size, n_rays);
+    Tensor cur_rays_o =
+        rays_o.index({Slc(i, i_high)}).to(torch::kCUDA).contiguous();
+    Tensor cur_rays_d =
+        rays_d.index({Slc(i, i_high)}).to(torch::kCUDA).contiguous();
+    Tensor cur_bounds =
+        bounds.index({Slc(i, i_high)}).to(torch::kCUDA).contiguous();
+
+    auto render_result =
+        renderer_->Render(cur_rays_o, cur_rays_d, cur_bounds, Tensor());
+    Tensor colors = render_result.colors.detach().to(torch::kCPU);
+    Tensor depths = render_result.depth.detach().to(torch::kCPU).squeeze();
+    // Tensor disp = render_result.disparity.detach().to(torch::kCPU).squeeze();
+
+    pred_colors.index_put_({Slc(i, i_high)}, colors);
+    pred_depths.index_put_({Slc(i, i_high)}, depths.unsqueeze(-1));
+    // pred_disp.index_put_({Slc(i, i_high)}, disp.unsqueeze(-1));
+    // if (!render_result.first_oct_dis.sizes().empty()) {
+    //   Tensor &ret_first_oct_dis = render_result.first_oct_dis;
+    //   if (ret_first_oct_dis.has_storage()) {
+    //     Tensor cur_first_oct_dis =
+    //         render_result.first_oct_dis.detach().to(torch::kCPU);
+    //     first_oct_disp.index_put_({Slc(i, i_high)}, cur_first_oct_dis);
+    //   }
+    // }
+  }
+  // pred_disp = pred_disp / pred_disp.max();
+  // first_oct_disp = first_oct_disp.min() / first_oct_disp;
+
+  return {pred_colors, pred_depths};
+}
+
 void ExpRunner::RenderAllImages() {
   for (int idx = 0; idx < dataset_->n_images_; idx++) {
     VisualizeImage(idx);
@@ -438,9 +484,61 @@ void ExpRunner::TestImages() {
 
   global_data_pool_->mode_ = prev_mode;
 }
+void ExpRunner::OutputMeshMeta() {
 
+  torch::NoGradGuard no_grad_guard;
+  auto prev_mode = global_data_pool_->mode_;
+  global_data_pool_->mode_ = RunningMode::VALIDATE;
+  std::string mesh_meta_path = base_exp_dir_ + "/mesh_meta";
+  {
+    fs::create_directories(mesh_meta_path);
+    int counter = 0;
+    for (int i : dataset_->train_set_) {
+      auto [rays_o, rays_d, bounds] = dataset_->RaysOfCamera(i);
+      auto [pred_colors, pred_depths] = RenderWholeImageForMesh(
+          rays_o, rays_d, bounds); // At this stage, the returned number is
+
+      int H = dataset_->height_;
+      int W = dataset_->width_;
+
+      auto quantify = [](const Tensor &x) {
+        return (x.clip(0.f, 1.f) * 255.f)
+                   .to(torch::kUInt8)
+                   .to(torch::kFloat32) /
+               255.f;
+      };
+      pred_colors = pred_colors.reshape({H, W, 3});
+      pred_colors = quantify(pred_colors);
+      pred_depths = pred_depths.reshape({H, W, 1});
+      Tensor c2w = dataset_->c2w_[i].detach().to(torch::kCPU).contiguous();
+      Tensor intri = dataset_->intri_[i].detach().to(torch::kCPU).contiguous();
+
+      cnpy::npy_save(mesh_meta_path + "/" +
+                         fmt::format("color_{}_{:0>3d}.npy", iter_step_, i),
+                     (float *)pred_colors.data_ptr(),
+                     {(unsigned long)H, (unsigned long)W, 3});
+
+      cnpy::npy_save(mesh_meta_path + "/" +
+                         fmt::format("depth_{}_{:0>3d}.npy", iter_step_, i),
+                     (float *)pred_depths.data_ptr(),
+                     {(unsigned long)H, (unsigned long)W, 1});
+      cnpy::npy_save(mesh_meta_path + "/" +
+                         fmt::format("c2w_{}_{:0>3d}.npy", iter_step_, i),
+                     (float *)c2w.data_ptr(), {3, 4});
+      cnpy::npy_save(mesh_meta_path + "/" +
+                         fmt::format("intri_{}_{:0>3d}.npy", iter_step_, i),
+                     (float *)intri.data_ptr(), {3, 3});
+      counter += 1;
+      if (counter % 20 == 0) {
+        std::cout << "process: " << counter << "/"
+                  << dataset_->train_set_.size() << std::endl;
+      }
+    }
+  }
+}
 void ExpRunner::Execute() {
   std::string mode = global_data_pool_->config_["mode"].as<std::string>();
+  std::cout << "===============> mode: " << mode.c_str() << std::endl;
   if (mode == "train") {
     Train();
   } else if (mode == "render_path") {
@@ -449,5 +547,7 @@ void ExpRunner::Execute() {
     TestImages();
   } else if (mode == "render_all") {
     RenderAllImages();
+  } else if (mode == "mesh_mata") {
+    OutputMeshMeta();
   }
 }

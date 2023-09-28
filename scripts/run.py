@@ -57,15 +57,15 @@ def main(conf: DictConfig) -> None:
     os.makedirs(base_exp_dir, exist_ok=True)
 
     # backup codes
-    file_backup_dir = os.path.join(base_exp_dir, 'record/')
-    os.makedirs(file_backup_dir, exist_ok=True)
+    # file_backup_dir = os.path.join(base_exp_dir, 'record/')
+    # os.makedirs(file_backup_dir, exist_ok=True)
 
-    for file_pattern in backup_file_patterns:
-        file_list = glob(os.path.join(base_dir, file_pattern))
-        for file_name in file_list:
-            new_file_name = file_name.replace(base_dir, file_backup_dir)
-            os.makedirs(os.path.dirname(new_file_name), exist_ok=True)
-            copyfile(file_name, new_file_name)
+    # for file_pattern in backup_file_patterns:
+    #     file_list = glob(os.path.join(base_dir, file_pattern))
+    #     for file_name in file_list:
+    #         new_file_name = file_name.replace(base_dir, file_backup_dir)
+    #         os.makedirs(os.path.dirname(new_file_name), exist_ok=True)
+    #         copyfile(file_name, new_file_name)
 
     make_image_list(data_path, conf['dataset']['factor'])
 
@@ -74,7 +74,7 @@ def main(conf: DictConfig) -> None:
     conf['base_dir'] = base_dir
     conf['base_exp_dir'] = base_exp_dir
 
-    OmegaConf.save(conf, os.path.join(file_backup_dir, 'runtime_config.yaml'))
+    # OmegaConf.save(conf, os.path.join(file_backup_dir, 'runtime_config.yaml'))
     OmegaConf.save(conf, './runtime_config.yaml')
 
     os.system('cmake --build build --target main --config RelWithDebInfo -j')
