@@ -22,7 +22,7 @@ sudo pacman -S zlib
 ```
 
 
-### Step 2. Clone this repository:
+### Step 2. Clone this repository
 
 ```shell
 git clone --recursive https://github.com/Totoro97/f2-nerf.git
